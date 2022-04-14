@@ -1,0 +1,99 @@
+<body>
+<div class="container">
+  <style>
+
+    body{
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+    .container{
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    input[type=text]{
+        padding: 5px;
+        border-radius: 5px;
+        border: #888 2px solid;
+        width: 250px;
+    }
+    button{
+        padding: 5px;
+        background-color: #eee;
+        border-radius: 5px;
+        outline: none;
+    }
+    .msg_room{
+        display: none;
+    }
+    .pname{
+        font-weight: bold;
+        margin-left: 5px;
+    }
+    .pmsg{
+        background-color: #eee;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    ul{
+        list-style: none;
+    }
+
+</style>
+
+<form class="init_form">
+  <input type="text" name="name" placeholder="Enter your name" required />
+  <button>Start Chat</button>
+</form>
+
+<div class="msg_room">
+  <ul class="msg_list"></ul>
+  <form class="msg_form">
+    <input type="text" name="message" placeholder="Type a message" required />
+    <button>Send</button>
+  </form>
+</div>
+</div>
+
+<script>
+const initForm = document.querySelector('.init_form');
+const msgRoom = document.querySelector('.msg_room');
+const msgList = document.querySelector('.msg_list');
+const msgForm = document.querySelector('.msg_form');
+const ws = new WebSocket('ws://localhost:3000/ws');
+
+initForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    name = initForm.elements["name"].value;
+    msgRoom.style.display = "block"
+    initForm.style.display = "none"
+});
+
+msgForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const msg = msgForm.elements["message"].value;
+    ws.send(JSON.stringify({
+        name,
+        msg
+    }));
+    msgForm.message.value = '';
+});
+
+const msgOutput = ({ data }) => {
+    const { name, msg } = JSON.parse(data);
+    const li = `
+        <li>
+            <div class="pname">${name}</div>
+            <div class="pmsg">${msg}</div>
+        </li>
+    `;
+    msgList.innerHTML += li;
+}
+ws.addEventListener('message', msgOutput);
+</script>
+</body>
+
+
